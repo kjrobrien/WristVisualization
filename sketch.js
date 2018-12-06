@@ -25,14 +25,15 @@ function draw() {
 	let tubeRot = rotSlider.value();
 
 	translate(0, (windowHeight/2)*0.95);
-	scale(windowHeight / 40);
+	let scaleFactor = windowHeight / 40;
+	scale(scaleFactor);
 
 	let points = kinematicsPoints(tDispl, tubeRot, tubeAdv);
 
 	for (let i = 1; i < points.length; i++) {
 		let start = points[i - 1];
 		let end = points[i];
-		strokeWeight(OD);
+		strokeWeight(scaleFactor);
   		stroke(colors[i-1]);
 		line(start[0], -start[2], start[1], end[0], -end[2], end[1]);
 	}
