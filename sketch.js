@@ -5,17 +5,18 @@ colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	tDisplSlider = createSlider(0.000001, 2, 0.000001, 0.001);
-	tDisplSlider.position(20, 20);
-	tDisplSlider.size(windowWidth * 0.4);
 	rotSlider = createSlider(0, 2 * PI, 0, 0.001);
-	rotSlider.position(20, 50);
-	rotSlider.size(windowWidth * 0.4);
 	advSlider = createSlider(0, 25, 0, 0.1);
-	advSlider.position(20, 80);
-	advSlider.size(windowWidth * 0.4);
-
+	sliderSizeAndPos();
 }
-
+function sliderSizeAndPos() {
+	tDisplSlider.position(windowWidth * 0.05, windowHeight * 0.1);
+	tDisplSlider.size(windowWidth * 0.3);
+	rotSlider.position(windowWidth * 0.05, windowHeight * 0.2);
+	rotSlider.size(windowWidth * 0.3);
+	advSlider.position(windowWidth * 0.05, windowHeight * 0.3);
+	advSlider.size(windowWidth * 0.3);
+}
 function draw() {
 
 	background('white');
@@ -39,7 +40,5 @@ function draw() {
 
 function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
-	tDisplSlider.size(windowWidth * 0.4);
-	rotSlider.size(windowWidth * 0.4);
-	advSlider.size(windowWidth * 0.4);
+	sliderSizeAndPos();
 }
