@@ -4,6 +4,7 @@ colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
+	ortho();
 	tDisplSlider = createSlider(0.000001, 2, 0.000001, 0.001);
 	rotSlider = createSlider(0, 2 * PI, 0, 0.001);
 	advSlider = createSlider(0, 25, 0, 0.1);
