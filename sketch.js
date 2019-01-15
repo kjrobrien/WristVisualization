@@ -3,20 +3,26 @@
 colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 			'#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'];
 
-var tendon_displacement_mm = 0.000001;
-var tube_advancement_mm = 0;
-var tube_rotation_degrees = 0;
+var tendonDisplmm = 0.000001;
+var tendonDisplmmMin = 0.000001;
+var tendonDisplmmMax = 1;
+var tendonDisplmmStep = 0.001;
+
+var tubeAdvmm = 0;
+var tubeAdvmmMin = 0;
+var tubeAdvmmMax = 25;
+var tubeAdvmmStep = 0.1;
+
+var tubeRotDeg = 0;
+var tubeRotDegMin = 0;
+var tubeRotDegMax = 360;
+var tubeRotDegStep = 1;
 
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	ortho();
 	gui = createGui('Kinematics Control');
-	sliderRange(0.000001, 1, 0.001);
-	gui.addGlobals('tendon_displacement_mm');
-	sliderRange(0, 25, 0, 0.1);
-	gui.addGlobals('tube_advancement_mm');
-	sliderRange(0, 360, 1);
-	gui.addGlobals('tube_rotation_degrees');
+	gui.addGlobals('tendonDisplmm', 'tubeAdvmm', 'tubeRotDeg');
 }
 
 function draw() {
@@ -25,9 +31,9 @@ function draw() {
 	translate(0, (windowHeight / 2) * 0.95);
 	let scaleFactor = windowHeight / 40;
 	scale(scaleFactor);
-	let radians = tube_rotation_degrees * PI / 180.0;
-	let points = kinematicsPoints(tendon_displacement_mm, radians, tube_advancement_mm);
-	let rots = rotations(tendon_displacement_mm, radians, tube_advancement_mm);
+	let radians = tubeRotDeg * PI / 180.0;
+	let points = kinematicsPoints(tendonDisplmm, radians, tubeAdvmm);
+	let rots = rotations(tendonDisplmm, radians, tubeAdvmm);
 
 	for (let i = 1; i < points.length; i++) {
 		let start = points[i - 1];
