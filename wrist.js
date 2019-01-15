@@ -4,6 +4,7 @@
  * wrist.js implements the kinematics of a notched-wrist manipulator.
  * 
  */
+/*jshint esversion: 6 */
 
 
 const ID = 1.6;          //   [mm] tube inner diameter
@@ -49,6 +50,18 @@ function kinematicsPoints(tDispl, tubeRot, tubeAdv) {
     for (let i = 3; i < nCutouts + 3; i++) {
         currentMatrix = math.multiply(currentMatrix, notch);
         result[i] = coordinates(currentMatrix);
+    }
+    return result;
+}
+
+// Returns angles to rotate in [x, y, z] for given notch kinematics
+function rotations(tDispl, tubeRot, tubeAdv) {
+    let result = [];
+    result[0] = [0, 0, tubeRot];
+    result[1] = [0, 0, 0];
+    let notchAngle = math.acos(notchKinematics(tDispl).subset(math.index(0, 0)));
+    for (let i = 2; i < nCutouts + 2; i++) {
+        result[i] = [0, notchAngle, 0];
     }
     return result;
 }
@@ -113,4 +126,14 @@ function notchKinematics(tDispl) {
 // Returns array [x, y, z]
 function coordinates(matrix) {
     return math.transpose(matrix.subset(math.index([0, 1, 2], 3))).valueOf()[0];
+}
+
+// Returns the distance between two points.
+// pointOne = point [x, y, z]
+// pointTwo = point [x, y, z]
+// Returns distance as number 
+function distance(pointOne, pointTwo) {
+    return math.sqrt(math.pow(pointOne[0] - pointTwo[0], 2) +
+    math.pow(pointOne[1] - pointTwo[1], 2) +
+    math.pow(pointOne[2] - pointTwo[2], 2));
 }
