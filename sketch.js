@@ -3,35 +3,31 @@
 colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 			'#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'];
 
+var tendon_displacement_mm = 0.000001;
+var tube_advancement_mm = 0;
+var tube_rotation_degrees = 0;
 
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	ortho();
-	tDisplSlider = createSlider(0.000001, 1, 0.000001, 0.001);
-	rotSlider = createSlider(0, 2 * PI, 0, 0.001);
-	advSlider = createSlider(0, 25, 0, 0.1);
-	sliderSizeAndPos();
+	gui = createGui('Kinematics Control');
+	sliderRange(0.000001, 1, 0.001);
+	gui.addGlobals('tendon_displacement_mm');
+	sliderRange(0, 25, 0, 0.1);
+	gui.addGlobals('tube_advancement_mm');
+	sliderRange(0, 360, 1);
+	gui.addGlobals('tube_rotation_degrees');
 }
-function sliderSizeAndPos() {
-	tDisplSlider.position(windowWidth * 0.05, windowHeight * 0.1);
-	tDisplSlider.size(windowWidth * 0.3);
-	rotSlider.position(windowWidth * 0.05, windowHeight * 0.2);
-	rotSlider.size(windowWidth * 0.3);
-	advSlider.position(windowWidth * 0.05, windowHeight * 0.3);
-	advSlider.size(windowWidth * 0.3);
-}
+
 function draw() {
 	background('white');
-	let tDispl = tDisplSlider.value();
-	let tubeAdv = advSlider.value();
-	let tubeRot = rotSlider.value();
 
 	translate(0, (windowHeight / 2) * 0.95);
 	let scaleFactor = windowHeight / 40;
 	scale(scaleFactor);
-
-	let points = kinematicsPoints(tDispl, tubeRot, tubeAdv);
-	let rots = rotations(tDispl, tubeRot, tubeAdv);
+	let radians = tube_rotation_degrees * PI / 180.0;
+	let points = kinematicsPoints(tendon_displacement_mm, radians, tube_advancement_mm);
+	let rots = rotations(tendon_displacement_mm, radians, tube_advancement_mm);
 
 	for (let i = 1; i < points.length; i++) {
 		let start = points[i - 1];
@@ -51,5 +47,4 @@ function draw() {
 
 function windowResized() {
 	resizeCanvas(windowWidth, windowHeight);
-	sliderSizeAndPos();
 }

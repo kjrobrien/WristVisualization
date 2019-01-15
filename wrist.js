@@ -35,7 +35,7 @@ function forwardKinematics(tDispl, tubeRot, tubeAdv) {
     }
 
     return result;
-};
+}
 
 function kinematicsPoints(tDispl, tubeRot, tubeAdv) {
     let result = [];
