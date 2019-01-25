@@ -21,7 +21,7 @@ function settingsInit() {
 	settings = QuickSettings.create(0, 0, "Wrist Control");
 	settings.setKey("h");
 	settings.addHTML("SCREAM Visualization",
-		"2018-19 WPI MQP.<br />Distances are in millimeters.<br/>Angles are in degrees.");
+		"2018-19 <a href=\"https://wpi.edu\">WPI</a> MQP.<br />Distances are in millimeters.<br/>Angles are in degrees.");
 	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
 	settings.hideControl('sensor');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
