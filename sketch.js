@@ -19,6 +19,7 @@ function setup() {
 
 function settingsInit() {
 	settings = QuickSettings.create(0, 0, "Wrist Control");
+	settings.setKey("h");
 	settings.addHTML("overview",
 		"<h3>SCREAM Visualization</h3>\
 		2018-19 WPI MQP.<br />\
