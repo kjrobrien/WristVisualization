@@ -27,6 +27,8 @@
       }
 
       var ws = new ReconnectingWebSocket("ws://192.168.4.1:81/");
+      ws.reconnectInterval = 500;
+      ws.reconnectDelay = 1;
       ws.onopen = function (event) {
         settings.showControl('sensor');
       };
