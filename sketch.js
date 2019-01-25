@@ -18,7 +18,12 @@ function setup() {
 }
 
 function settingsInit() {
-	settings = QuickSettings.create(0, 0, "Wrist Visualization");
+	settings = QuickSettings.create(0, 0, "Wrist Control");
+	settings.addHTML("overview",
+		"<h3>SCREAM Visualization</h3>\
+		2018-19 WPI MQP.<br />\
+		Distances are in millimeters.<br/>Angles are in degrees.");
+	settings.hideTitle("overview");
 	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
 	settings.hideControl('sensor');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
