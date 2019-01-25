@@ -18,9 +18,9 @@ function setup() {
 }
 
 function settingsInit() {
-	settings = QuickSettings.create();
+	settings = QuickSettings.create(0, 0, "Wrist Visualization");
 	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
-	settings.disableControl('sensor');
+	settings.hideControl('sensor');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
 	settings.bindRange('advancement', 0, 25, 0, 0.1, motion);
 	settings.bindRange('rotation', 0, 360, 0, 1, motion);

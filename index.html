@@ -28,13 +28,13 @@
 
       var ws = new ReconnectingWebSocket("ws://192.168.4.1:81/");
       ws.onopen = function (event) {
-        settings.enableControl('sensor');
+        settings.showControl('sensor');
       };
       ws.onclose = function (event) {
-        settings.disableControl('sensor');
+        settings.hideControl('sensor');
       };
       ws.onerror = function (event) {
-        settings.disableControl('sensor');
+        settings.hideControl('sensor');
       };
       ws.onmessage = function (event) {
         console.log(event.data);
