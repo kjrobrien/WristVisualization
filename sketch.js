@@ -3,26 +3,27 @@
 colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 			'#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'];
 
-var displacement_mm = 0.000001;
-var displacement_mmMin = 0.000001;
-var displacement_mmMax = 1;
-var displacement_mmStep = 0.001;
+var motion = {
+	displacement : 0.000001,
+	advancement : 0,
+	rotation: 0
+};
 
-var advancement_mm = 0;
-var advancement_mmMin = 0;
-var advancement_mmMax = 25;
-var advancement_mmStep = 0.1;
-
-var rotation_deg = 0;
-var rotation_degMin = 0;
-var rotation_degMax = 360;
-var rotation_degStep = 1;
+var settings;
 
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	ortho();
-	gui = createGui('Kinematics Control');
-	gui.addGlobals('displacement_mm', 'advancement_mm', 'rotation_deg');
+	settingsInit();
+}
+
+function settingsInit() {
+	settings = QuickSettings.create();
+	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
+	settings.disableControl('sensor');
+	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
+	settings.bindRange('advancement', 0, 25, 0, 0.1, motion);
+	settings.bindRange('rotation', 0, 360, 0, 1, motion);
 }
 
 function draw() {
@@ -31,10 +32,9 @@ function draw() {
 	translate(0, (windowHeight / 2) * 0.95);
 	let scaleFactor = windowHeight / 40;
 	scale(scaleFactor);
-	let radians = rotation_deg * PI / 180.0;
-	let points = kinematicsPoints(displacement_mm, radians, advancement_mm);
-	let rots = rotations(displacement_mm, radians, advancement_mm);
-
+	let radians = motion.rotation * PI / 180.0;
+	let points = kinematicsPoints(motion.displacement, radians, motion.advancement);
+	let rots = rotations(motion.displacement, radians, motion.advancement);
 	for (let i = 1; i < points.length; i++) {
 		let start = points[i - 1];
 		let end = points[i];

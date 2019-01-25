@@ -7,7 +7,7 @@
   <script src="libs/p5.js" type="text/javascript"></script> <!-- library for vis -->
   <script src="libs/p5.dom.js" type="text/javascript"></script> <!-- library for vis dom interaction -->
   <script src="libs/quicksettings.js" type="text/javascript"></script>
-  <script src="libs/p5.gui.js" type="text/javascript"></script>
+  <script src="libs/reconnecting-websocket.js" type="text/javascript"></script>
 
   <!-- End libraries... -->
 
@@ -20,5 +20,33 @@
 </head>
 <body>
     <script src="sketch.js" type="text/javascript"></script> <!-- wrist visualization -->
+
+    <script type="text/javascript">
+      const scale_num = (num, in_min, in_max, out_min, out_max) => {
+        return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+      }
+
+      var ws = new ReconnectingWebSocket("ws://192.168.4.1:81/");
+      ws.onopen = function (event) {
+        settings.enableControl('sensor');
+      };
+      ws.onclose = function (event) {
+        settings.disableControl('sensor');
+      };
+      ws.onerror = function (event) {
+        settings.disableControl('sensor');
+      };
+      ws.onmessage = function (event) {
+        console.log(event.data);
+        let currentSensor = settings.getValue('sensor')['value'];
+        if (currentSensor == 'rotation') {
+          settings.setValue('rotation', scale_num(event.data, 0, 1024, 0, 360));
+        } else if (currentSensor == 'advancement') {
+          settings.setValue('advancement', scale_num(event.data, 0, 1024, 0, 25));
+        } else if (currentSensor == 'displacement') {
+          settings.setValue('displacement', scale_num(event.data, 0, 1024, 0.000001, 1));
+        }
+      };
+    </script>
 </body>
 </html>
