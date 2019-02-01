@@ -3,6 +3,7 @@
 colors = ['#8dd3c7', '#ffcc00', '#bebada', '#fb8072', '#80b1d3', '#fdb462',
 			'#b3de69', '#fccde5', '#d9d9d9', '#bc80bd', '#ccebc5', '#ffed6f'];
 
+// Initial values
 var motion = {
 	displacement : 0.000001,
 	advancement : 0,
@@ -10,6 +11,11 @@ var motion = {
 };
 
 var settings;
+let notch;
+
+function preload() {
+	notch = loadModel('SingleNotch.obj');
+}
 
 function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
@@ -21,7 +27,8 @@ function settingsInit() {
 	settings = QuickSettings.create(0, 0, "Wrist Control");
 	settings.setKey("h");
 	settings.addHTML("SCREAM Visualization",
-		"2018-19 <a href=\"https://wpi.edu\">WPI</a> MQP.<br />Distances are in millimeters.<br/>Angles are in degrees.");
+		`2018-19 <a href="https://wpi.edu">WPI</a> MQP.<br />
+		Distances are in millimeters.<br/>Angles are in degrees.`);
 	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
 	settings.hideControl('sensor');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
@@ -47,9 +54,15 @@ function draw() {
 		rotateZ(rotation[1]);
 		stroke(colors[i-1]);
 		// p5.js uses the center of the cylinder as its origin, therefore
-		// we translate half the length before and after creating the cylinder
+		// we translate half the length before and after
 		translate(0, -distance(start, end) / 2);
-		cylinder(OD / 2, distance(start, end), 24, 16, false, false);
+		if (i > 2) {
+			// it is a notch
+			model(notch);
+		} else {
+			// it is the base length or advancement
+			cylinder(OD / 2, distance(start, end), 24, 16, false, false);
+		}
 		translate(0, -distance(start, end) / 2);
 	}
 }
