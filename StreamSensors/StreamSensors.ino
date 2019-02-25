@@ -9,11 +9,49 @@
 #define APPSK  "ohsoscary"
 #endif
 
+#define PORT A0
+
+struct wrap_sensor {
+  int value;
+  int offset;
+  byte id;
+  String name;
+};
+
 const char *ssid = APSSID;
 const char *password = APPSK;
 
 ESP8266WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
+
+wrap_sensor advancement = {0, 0, 1, "advancement"};
+
+wrap_sensor rotation = {0, 0, 2, "rotation"};
+
+void initializeSensors() {
+  switchSensor(&advancement);
+  advancement.value = analogRead(PORT);
+  switchSensor(&rotation);
+  rotation.value = analogRead(PORT);
+}
+
+void switchSensor(wrap_sensor* sensor) {
+  
+}
+
+void handleSensorWrap(wrap_sensor* sensor) {
+  switchSensor(sensor);
+  int pos = analogRead(PORT);
+  if (pos - sensor->value > 512) {
+    Serial.println("Sensor wrap-under detected");
+    sensor->offset -= 1023;
+  } else if (sensor->value - pos > 512) {
+    Serial.println("Sensor wrap-over detected");
+    sensor->offset += 1023;
+  }
+  sensor->value = pos;
+}
+
 
 
 /* Just a little test message.  Go to http://192.168.4.1 in a web browser
@@ -24,16 +62,23 @@ void handleRoot() {
 }
 
 void handleSensor() {
-  server.send(200, "text/html", sensorValue());
+  server.send(200, "text/html", JSONSensors());
 }
 
-void broadcastSensor() {
-  String value = sensorValue();
+void broadcastSensors() {
+  String value = JSONSensors();
   webSocket.broadcastTXT(value.c_str(), value.length());
 }
 
-String sensorValue() {
-  return String(analogRead(A0), DEC);
+String JSONSensors() {
+  String adv = sensorValue(&advancement);
+  String rot = sensorValue(&rotation);
+  return String("{" + adv + ", " + rot + "}");
+}
+
+String sensorValue(wrap_sensor* sensor) {
+  String value = String(sensor->offset + sensor->value, DEC);
+  return String("\"" + sensor->name + "\" \: " + value);
 }
 
 
@@ -47,7 +92,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
       {
         Serial.println("Websocket client connected!");
         // first sensor message
-        broadcastSensor();
+        broadcastSensors();
       }
       break;
   }
@@ -77,16 +122,31 @@ void setup() {
   Serial.println("Websocket server started on port 81");
 
   webSocket.onEvent(webSocketEvent);
+
+  initializeSensors();
 }
 
 unsigned long period = 100;
 unsigned long last_time = 0;
 
+unsigned long update_period = 20;
+unsigned long last_update = 0;
+
+
 void loop() {
   server.handleClient();
   webSocket.loop();
+
+  // handle sensor update and wraparound
+  if (last_update + update_period <= millis()) {
+    handleSensorWrap(&advancement);
+    handleSensorWrap(&rotation);
+    last_update = millis();
+  }
+
+  // broadcast sensors
   if (last_time + period <= millis()) {
     last_time = millis();
-    broadcastSensor();
+    broadcastSensors();
   }
 }
