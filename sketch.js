@@ -21,6 +21,7 @@ function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	ortho();
 	settingsInit();
+	startConnection();
 }
 
 function settingsInit() {
@@ -53,7 +54,7 @@ function draw() {
 		rotateY(rotation[2]);
 		rotateZ(rotation[1]);
 		stroke(colors[i-1]);
-		// p5.js uses the center of the cylinder as its origin, therefore
+		// p5.js uses the center of the object as its origin, therefore
 		// we translate half the length before and after
 		translate(0, -distance(start, end) / 2);
 		if (i > 2) {

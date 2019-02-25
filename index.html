@@ -19,36 +19,39 @@
 
 </head>
 <body>
-    <script src="sketch.js" type="text/javascript"></script> <!-- wrist visualization -->
-
     <script type="text/javascript">
       const scale_num = (num, in_min, in_max, out_min, out_max) => {
         return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
       }
 
-      var ws = new ReconnectingWebSocket("ws://192.168.4.1:81/");
-      ws.reconnectInterval = 500;
-      ws.reconnectDelay = 1;
-      ws.onopen = function (event) {
-        settings.showControl('sensor');
-      };
-      ws.onclose = function (event) {
-        settings.hideControl('sensor');
-      };
-      ws.onerror = function (event) {
-        settings.hideControl('sensor');
-      };
-      ws.onmessage = function (event) {
-        console.log(event.data);
-        let currentSensor = settings.getValue('sensor')['value'];
-        if (currentSensor == 'rotation') {
-          settings.setValue('rotation', scale_num(event.data, 0, 1024, 0, 360));
-        } else if (currentSensor == 'advancement') {
-          settings.setValue('advancement', scale_num(event.data, 0, 1024, 0, 25));
-        } else if (currentSensor == 'displacement') {
-          settings.setValue('displacement', scale_num(event.data, 0, 1024, 0.000001, 1));
-        }
-      };
+      function startConnection() {
+        var ws = new ReconnectingWebSocket("ws://192.168.4.1:81/");
+        ws.reconnectInterval = 500;
+        ws.reconnectDelay = 1;
+        ws.onopen = function (event) {
+          settings.showControl('sensor');
+        };
+        ws.onclose = function (event) {
+          settings.hideControl('sensor');
+        };
+        ws.onerror = function (event) {
+          settings.hideControl('sensor');
+        };
+        ws.onmessage = function (event) {
+          let data = JSON.parse(event.data);
+          console.log(data);
+          let currentSensor = settings.getValue('sensor')['value'];
+          if (currentSensor == 'rotation') {
+            settings.setValue('rotation', scale_num(data['advancement'], 0, 1023, 0, 360));
+          } else if (currentSensor == 'advancement') {
+            settings.setValue('advancement', scale_num(data['advancement'], 0, 1023, 0, 25));
+          } else if (currentSensor == 'displacement') {
+            settings.setValue('displacement', scale_num(data['advancement'], 0, 1023, 0.000001, 1));
+          }
+        };
+      }
     </script>
+    <script src="sketch.js" type="text/javascript"></script> <!-- wrist visualization -->
+
 </body>
 </html>
