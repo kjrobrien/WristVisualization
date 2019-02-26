@@ -23,7 +23,7 @@
       }
 
       function startConnection() {
-        var ws = new ReconnectingWebSocket("//192.168.4.1:81/");
+        var ws = new ReconnectingWebSocket("wss://192.168.4.1:81/");
         ws.reconnectInterval = 500;
         ws.reconnectDelay = 1;
         ws.onopen = function (event) {
