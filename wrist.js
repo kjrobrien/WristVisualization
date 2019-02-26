@@ -6,6 +6,9 @@
  */
 /*jshint esversion: 6 */
 
+transpose = a => a[0].map((x, i) => a.map(y => y[i]));
+mmultiply = (a, b) => a.map(x => transpose(b).map(y => dotproduct(x, y)));
+dotproduct = (a, b) => a.map((x, i) => a[i] * b[i]).reduce((m, n) => m + n);
 
 const ID = 1.6;          //   [mm] tube inner diameter
 const OD = 1.8;          //   [mm] tube outer diameter
@@ -16,22 +19,25 @@ const cutoutHeight = 1;  //   [mm] height of the cutout (length of the cut)
 const cutoutWidth = 1.6; //   [mm] width of the cutout (depth of the cut)
 
 function forwardKinematics(tDispl, tubeRot, tubeAdv) {        
-    let result = math.identity(4);
+    let result = [[1, 0, 0, 0],
+                  [0, 1, 0, 0],
+                  [0, 0, 1, 0],
+                  [0, 0, 0, 1]];
 
     // Perform the rotation
-    result = math.multiply(result, zRotation(tubeRot));
+    result = mmultiply(result, zRotation(tubeRot));
 
     // Perform the advancement
-    result = math.multiply(result, zTranslation(tubeAdv));
+    result = mmultiply(result, zTranslation(tubeAdv));
 
     // Account for base length of the tube
-    result = math.multiply(result, zTranslation(baseLength));
+    result = mmultiply(result, zTranslation(baseLength));
 
     let notch = notchKinematics(tDispl);
 
     // Add each notch
     for (let i = 0; i < nCutouts; i++) {
-    result = math.multiply(result, notch);
+    result = mmultiply(result, notch);
     }
 
     return result;
@@ -41,14 +47,14 @@ function kinematicsPoints(tDispl, tubeRot, tubeAdv) {
     let result = [];
     result[0] = [0,0,0];
     let currentMatrix = zRotation(tubeRot);
-    currentMatrix = math.multiply(currentMatrix, zTranslation(tubeAdv));
+    currentMatrix = mmultiply(currentMatrix, zTranslation(tubeAdv));
     result[1] = coordinates(currentMatrix);
-    currentMatrix = math.multiply(currentMatrix, zTranslation(baseLength));
+    currentMatrix = mmultiply(currentMatrix, zTranslation(baseLength));
     result[2] = coordinates(currentMatrix);
 
     let notch = notchKinematics(tDispl);
     for (let i = 3; i < nCutouts + 3; i++) {
-        currentMatrix = math.multiply(currentMatrix, notch);
+        currentMatrix = mmultiply(currentMatrix, notch);
         result[i] = coordinates(currentMatrix);
     }
     return result;
@@ -59,7 +65,7 @@ function rotations(tDispl, tubeRot, tubeAdv) {
     let result = [];
     result[0] = [0, 0, tubeRot];
     result[1] = [0, 0, 0];
-    let notchAngle = math.acos(notchKinematics(tDispl).subset(math.index(0, 0)));
+    let notchAngle = Math.acos(notchKinematics(tDispl)[0][0]);
     for (let i = 2; i < nCutouts + 2; i++) {
         result[i] = [0, notchAngle, 0];
     }
@@ -69,10 +75,10 @@ function rotations(tDispl, tubeRot, tubeAdv) {
 // Returns the transformation matrix for rotation about the z-axis.
 // angle = angle in radians of rotation
 function zRotation(angle) {
-    return math.matrix([[math.cos(angle),     -math.sin(angle),   0, 0],
-                        [math.sin(angle),     math.cos(angle),    0, 0],
-                        [0,                   0,                  1, 0],
-                        [0,                   0,                  0, 1]]);
+    return [[Math.cos(angle),     -Math.sin(angle),   0, 0],
+            [Math.sin(angle),     Math.cos(angle),    0, 0],
+            [0,                   0,                  1, 0],
+            [0,                   0,                  0, 1]];
 }
 
 // Returns the transformation matrix for z translation.
@@ -83,8 +89,10 @@ function zRotation(angle) {
 // 0     0     1     length
 // 0     0     0     1
 function zTranslation(length) {
-    let result = math.identity(4);
-    return math.subset(result, math.index(2, 3), length);
+    return [[1, 0, 0, 0],
+            [0, 1, 0, 0],
+            [0, 0, 1, length],
+            [0, 0, 0, 1]];
 }
 
 // Returns the transformation matrix for a single notch (both cut and uncut sections)
@@ -93,14 +101,14 @@ function notchKinematics(tDispl) {
     let RI = ID / 2;
     let RO = OD / 2;
 
-    let phiO = 2 * math.acos((cutoutWidth - RO) / RO);
-    let phiI = 2 * math.acos((cutoutWidth - RO) / RI);
+    let phiO = 2 * Math.acos((cutoutWidth - RO) / RO);
+    let phiI = 2 * Math.acos((cutoutWidth - RO) / RI);
 
-    let aO = math.pow(RO, 2) * (phiO - math.sin(phiO)) / 2;
-    let aI = math.pow(RI, 2) * (phiI - math.sin(phiI)) / 2;
+    let aO = Math.pow(RO, 2) * (phiO - Math.sin(phiO)) / 2;
+    let aI = Math.pow(RI, 2) * (phiI - Math.sin(phiI)) / 2;
 
-    let yBarO = 4 * RO * math.pow((math.sin(0.5 * phiO)), 3) / (3 * (phiO - math.sin(phiO)));
-    let yBarI = 4 * RI * math.pow((math.sin(0.5 * phiI)), 3) / (3 * (phiI - math.sin(phiI)));
+    let yBarO = 4 * RO * Math.pow((Math.sin(0.5 * phiO)), 3) / (3 * (phiO - Math.sin(phiO)));
+    let yBarI = 4 * RI * Math.pow((Math.sin(0.5 * phiI)), 3) / (3 * (phiI - Math.sin(phiI)));
 
     let yBar = (yBarO * aO - yBarI * aI) / (aO - aI);
 
@@ -109,15 +117,15 @@ function notchKinematics(tDispl) {
     let s = cutoutHeight / (1 + yBar * kappa);
 
     // cut portion of notch
-    let tCut = math.matrix([[math.cos(kappa * s),   0, math.sin(kappa * s), (1 - math.cos(kappa * s)) / kappa],
-                            [0,                     1, 0,                   0],
-                            [-math.sin(kappa * s),  0, math.cos(kappa * s), math.sin(kappa * s) / kappa],
-                            [0,                     0, 0,                   1]]);
+    let tCut = [[Math.cos(kappa * s),   0, Math.sin(kappa * s), (1 - Math.cos(kappa * s)) / kappa],
+                [0,                     1, 0,                   0],
+                [-Math.sin(kappa * s),  0, Math.cos(kappa * s), Math.sin(kappa * s) / kappa],
+                [0,                     0, 0,                   1]];
     
     // uncut portion of notch
     let tUncut = zTranslation(uncutLength);
 
-    return math.multiply(tCut, tUncut);
+    return mmultiply(tCut, tUncut);
 }
 
 
@@ -125,7 +133,10 @@ function notchKinematics(tDispl) {
 // matrix = 4x4 transformation matrix.
 // Returns array [x, y, z]
 function coordinates(matrix) {
-    return math.transpose(matrix.subset(math.index([0, 1, 2], 3))).valueOf()[0];
+    let x = matrix[0][3];
+    let y = matrix[1][3];
+    let z = matrix[2][3];
+    return [x, y, z];
 }
 
 // Returns the distance between two points.
@@ -133,7 +144,7 @@ function coordinates(matrix) {
 // pointTwo = point [x, y, z]
 // Returns distance as number 
 function distance(pointOne, pointTwo) {
-    return math.sqrt(math.pow(pointOne[0] - pointTwo[0], 2) +
-    math.pow(pointOne[1] - pointTwo[1], 2) +
-    math.pow(pointOne[2] - pointTwo[2], 2));
+    return Math.sqrt(Math.pow(pointOne[0] - pointTwo[0], 2) +
+    Math.pow(pointOne[1] - pointTwo[1], 2) +
+    Math.pow(pointOne[2] - pointTwo[2], 2));
 }
