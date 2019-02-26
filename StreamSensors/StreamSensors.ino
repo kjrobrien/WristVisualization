@@ -2,6 +2,7 @@
 #include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
 #include <SPIFFS.h>
+#include <DNSServer.h>
 
 
 #ifndef APSSID
@@ -18,6 +19,8 @@ struct wrap_sensor {
 
 const char *ssid = APSSID;
 const char *password = APPSK;
+
+DNSServer dnsServer;
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -62,9 +65,10 @@ void handleSensor() {
   request->send(200, "text/html", JSONSensors());
 }
 */
-void broadcastSensors() {
-  String value = JSONSensors();
-  webSocket.broadcastTXT(value.c_str(), value.length());
+
+String sensorValue(wrap_sensor* sensor) {
+  String value = String(sensor->offset + sensor->value, DEC);
+  return String("\"" + sensor->name + "\" \: " + value);
 }
 
 String JSONSensors() {
@@ -73,11 +77,10 @@ String JSONSensors() {
   return String("{" + adv + ", " + rot + "}");
 }
 
-String sensorValue(wrap_sensor* sensor) {
-  String value = String(sensor->offset + sensor->value, DEC);
-  return String("\"" + sensor->name + "\" \: " + value);
+void broadcastSensors() {
+  String value = JSONSensors();
+  webSocket.broadcastTXT(value.c_str(), value.length());
 }
-
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
 
@@ -115,8 +118,8 @@ void setup() {
   /*
   server.on("/", handleRoot);
   server.on("/sensor", handleSensor);*/
-
-
+  
+  dnsServer.start(53, "*", IPAddress(192, 168, 4, 1));
   
   server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
   server.onNotFound(onRequest);
@@ -143,6 +146,7 @@ unsigned long last_update = 0;
 
 void loop() {
   //server.handleClient();
+  dnsServer.processNextRequest();
   webSocket.loop();
 
   // handle sensor update and wraparound
