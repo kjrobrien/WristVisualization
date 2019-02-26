@@ -1,6 +1,7 @@
 #include <WiFi.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <WebSocketsServer.h>
+#include <SPIFFS.h>
 
 
 #ifndef APSSID
@@ -18,7 +19,7 @@ struct wrap_sensor {
 const char *ssid = APSSID;
 const char *password = APPSK;
 
-WebServer server(80);
+AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
 wrap_sensor advancement = {0, 0, 33, "advancement"};
@@ -28,6 +29,11 @@ wrap_sensor rotation = {0, 0, 36, "rotation"};
 void initializeSensors() {
   advancement.value = analogRead(advancement.pin);
   rotation.value = analogRead(rotation.pin);
+}
+
+void onRequest(AsyncWebServerRequest *request){
+  //Handle Unknown Request
+  request->send(404);
 }
 
 void handleSensorWrap(wrap_sensor* sensor) {
@@ -47,14 +53,15 @@ void handleSensorWrap(wrap_sensor* sensor) {
 /* Just a little test message.  Go to http://192.168.4.1 in a web browser
    connected to this access point to see it.
 */
+/*
 void handleRoot() {
-  server.send(200, "text/html", "<h1>You are connected</h1>");
+  request->send(200, "text/html", "<h1>You are connected</h1>");
 }
 
 void handleSensor() {
-  server.send(200, "text/html", JSONSensors());
+  request->send(200, "text/html", JSONSensors());
 }
-
+*/
 void broadcastSensors() {
   String value = JSONSensors();
   webSocket.broadcastTXT(value.c_str(), value.length());
@@ -93,6 +100,10 @@ void setup() {
   delay(1000);
   Serial.begin(115200);
   Serial.println();
+  if(!SPIFFS.begin()){
+    Serial.println("An Error has occurred while mounting SPIFFS");
+    return;
+  }
   Serial.print("Configuring access point...");
   /* You can remove the password parameter if you want the AP to be open. */
   WiFi.softAP(ssid, password);
@@ -100,9 +111,16 @@ void setup() {
   IPAddress myIP = WiFi.softAPIP();
   Serial.print("AP IP address: ");
   Serial.println(myIP);
-  
+
+  /*
   server.on("/", handleRoot);
-  server.on("/sensor", handleSensor);
+  server.on("/sensor", handleSensor);*/
+
+
+  
+  server.serveStatic("/", SPIFFS, "/").setDefaultFile("index.html");
+  server.onNotFound(onRequest);
+  
   server.begin();
   
   Serial.println("HTTP server started on port 80");
@@ -124,7 +142,7 @@ unsigned long last_update = 0;
 
 
 void loop() {
-  server.handleClient();
+  //server.handleClient();
   webSocket.loop();
 
   // handle sensor update and wraparound
