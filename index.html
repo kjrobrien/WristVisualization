@@ -40,14 +40,8 @@
         ws.onmessage = function (event) {
           let data = JSON.parse(event.data);
           console.log(data);
-          let currentSensor = settings.getValue('sensor')['value'];
-          if (currentSensor == 'rotation') {
-            settings.setValue('rotation', scale_num(data['advancement'], 0, 1023, 0, 360));
-          } else if (currentSensor == 'advancement') {
-            settings.setValue('advancement', scale_num(data['advancement'], 0, 1023, 0, 25));
-          } else if (currentSensor == 'displacement') {
-            settings.setValue('displacement', scale_num(data['advancement'], 0, 1023, 0.000001, 1));
-          }
+          settings.setValue('rotation', scale_num(data['rotation'], 2550, 2550 + 4095 / 2, 0, 360));
+          settings.setValue('advancement', scale_num(data['advancement'], 4095, -5760, 0, 25));
         };
       }
     </script>

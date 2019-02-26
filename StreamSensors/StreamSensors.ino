@@ -1,6 +1,5 @@
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-#include <ESP8266WebServer.h>
+#include <WiFi.h>
+#include <WebServer.h>
 #include <WebSocketsServer.h>
 
 
@@ -9,45 +8,36 @@
 #define APPSK  "ohsoscary"
 #endif
 
-#define PORT A0
-
 struct wrap_sensor {
   int value;
   int offset;
-  byte id;
+  int pin;
   String name;
 };
 
 const char *ssid = APSSID;
 const char *password = APPSK;
 
-ESP8266WebServer server(80);
+WebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
 
-wrap_sensor advancement = {0, 0, 1, "advancement"};
+wrap_sensor advancement = {0, 0, 33, "advancement"};
 
-wrap_sensor rotation = {0, 0, 2, "rotation"};
+wrap_sensor rotation = {0, 0, 36, "rotation"};
 
 void initializeSensors() {
-  switchSensor(&advancement);
-  advancement.value = analogRead(PORT);
-  switchSensor(&rotation);
-  rotation.value = analogRead(PORT);
-}
-
-void switchSensor(wrap_sensor* sensor) {
-  
+  advancement.value = analogRead(advancement.pin);
+  rotation.value = analogRead(rotation.pin);
 }
 
 void handleSensorWrap(wrap_sensor* sensor) {
-  switchSensor(sensor);
-  int pos = analogRead(PORT);
-  if (pos - sensor->value > 512) {
+  int pos = analogRead(sensor->pin);
+  if (pos - sensor->value > 2048) {
     Serial.println("Sensor wrap-under detected");
-    sensor->offset -= 1023;
-  } else if (sensor->value - pos > 512) {
+    sensor->offset -= 4095;
+  } else if (sensor->value - pos > 2048) {
     Serial.println("Sensor wrap-over detected");
-    sensor->offset += 1023;
+    sensor->offset += 4095;
   }
   sensor->value = pos;
 }
