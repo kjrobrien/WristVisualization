@@ -27,13 +27,13 @@
         ws.reconnectInterval = 500;
         ws.reconnectDelay = 1;
         ws.onopen = function (event) {
-          settings.showControl('sensor');
+          settings.setValue('Sensor Status', 'Sensor Connected!');
         };
         ws.onclose = function (event) {
-          settings.hideControl('sensor');
+          settings.setValue('Sensor Status', 'Sensor Disconnected!');
         };
         ws.onerror = function (event) {
-          settings.hideControl('sensor');
+          settings.setValue('Sensor Status', 'Sensor Server Not Found!');
         };
         ws.onmessage = function (event) {
           let data = JSON.parse(event.data);

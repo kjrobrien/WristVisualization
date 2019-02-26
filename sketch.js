@@ -30,8 +30,7 @@ function settingsInit() {
 	settings.addHTML("SCREAM Visualization",
 		`2018-19 <a href="https://wpi.edu">WPI</a> MQP.<br />
 		Distances are in millimeters.<br/>Angles are in degrees.`);
-	settings.addDropDown('sensor', ['displacement', 'advancement', 'rotation']);
-	settings.hideControl('sensor');
+	settings.addHTML('Sensor Status', 'Sensor Not Connected!');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
 	settings.bindRange('advancement', 0, 25, 0, 0.1, motion);
 	settings.bindRange('rotation', 0, 360, 0, 1, motion);
