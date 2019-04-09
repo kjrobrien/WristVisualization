@@ -21,7 +21,9 @@ function setup() {
 	createCanvas(windowWidth, windowHeight, WEBGL);
 	ortho();
 	settingsInit();
-	startConnection();
+	if (location.protocol != 'https:') {
+		startConnection();
+	}
 }
 
 function settingsInit() {
