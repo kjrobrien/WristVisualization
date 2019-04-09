@@ -38,8 +38,9 @@
         ws.onmessage = function (event) {
           let data = JSON.parse(event.data);
           console.log(data);
-          settings.setValue('rotation', scale_num(data['rotation'], 2550, 2550 + 4095 / 2, 0, 360) % 360);
-          settings.setValue('advancement', scale_num(data['advancement'], 4095, -5760, 0, 25));
+          settings.setValue('rotation', scale_num(data['rotation'], 220, 220 + 4095 / 2, 0, 360) % 360);
+          settings.setValue('advancement', scale_num(data['advancement'], 4095, -5760, 0, 22.5));
+          ws.send(settings.getValue('displacement'));
         };
       }
     </script>

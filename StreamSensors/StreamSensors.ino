@@ -3,6 +3,7 @@
 #include <WebSocketsServer.h>
 #include <SPIFFS.h>
 #include <DNSServer.h>
+#include <Servo.h>
 
 
 #ifndef APSSID
@@ -21,6 +22,8 @@ const char *ssid = APSSID;
 const char *password = APPSK;
 
 DNSServer dnsServer;
+
+Servo servo;
 
 AsyncWebServer server(80);
 WebSocketsServer webSocket = WebSocketsServer(81);
@@ -82,6 +85,8 @@ void broadcastSensors() {
   webSocket.broadcastTXT(value.c_str(), value.length());
 }
 
+float displ_mm = 0;
+
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length) {
 
   switch (type) {
@@ -95,8 +100,31 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t length
         broadcastSensors();
       }
       break;
+    case WStype_TEXT:
+      {
+        String payload_str = String((char*) payload);
+        displ_mm = payload_str.toFloat();
+      }
+      break;
   }
 
+}
+
+double servo_mm_travel = 29.92367333;
+double max_advancement = 22.5;
+
+void setServo(double advancement, double displacement) {
+  double mm = (max_advancement - advancement) + (displacement * 4);
+  double angle = mm * 180 / servo_mm_travel;
+  servo.write(angle);
+}
+
+double scaleNum(double num, double in_min, double in_max, double out_min, double out_max) {
+  return (num - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+}
+
+double getAdvancementMM() {
+  return scaleNum(advancement.value + advancement.offset, 4095, -5760, 0, max_advancement);
 }
 
 void setup() {
@@ -135,6 +163,8 @@ void setup() {
   webSocket.onEvent(webSocketEvent);
 
   initializeSensors();
+
+  servo.attach(25);
 }
 
 unsigned long period = 100;
@@ -160,5 +190,6 @@ void loop() {
   if (last_time + period <= millis()) {
     last_time = millis();
     broadcastSensors();
+    setServo(getAdvancementMM(), displ_mm);
   }
 }
