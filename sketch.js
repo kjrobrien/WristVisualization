@@ -34,7 +34,7 @@ function settingsInit() {
 		Distances are in millimeters.<br/>Angles are in degrees.`);
 	settings.addHTML('Sensor Status', 'Sensor Not Connected!');
 	settings.bindRange('displacement', 0.000001, 1, 0.000001, 0.001, motion);
-	settings.bindRange('advancement', 0, 25, 0, 0.1, motion);
+	settings.bindRange('advancement', 0, 22.5, 0, 0.1, motion);
 	settings.bindRange('rotation', 0, 360, 0, 1, motion);
 }
 
