@@ -1,5 +1,5 @@
 # Scream MQP Visualization
-This repository contains the code for visualizing and controlling the WPI 2019 SCREAM MQP. The visualization supports two modes: slider-based control and sensor-based control.
+This repository contains the code for visualizing and controlling the WPI 2019 SCREAM MQP. The visualization supports two modes: slider-based control and sensor-based control. The slider-based control can be viewed here: https://kjrobrien.github.io/WristVisualization/.
 ## Slider-based Control
 This simply allows for the visualization of the three degrees of freedom (advancement, rotation, displacement) through sliders in the web browser.
 ## Sensor-based Control
